@@ -17,61 +17,22 @@ fn main() {
     println!("Target seats: {:?}", target_seats);
 }
 
-fn binary_space_partitioning(input: &str, mut max: u8, lower_half: char, upper_half: char) -> u8 {
-    let mut min = 0;
-
-    for ch in input.chars() {
-        let half = (max - min + 1) / 2;
-
-        if ch == lower_half {
-            max -= half;
-        } else if ch == upper_half {
-            min += half;
-        } else {
-            panic!(
-                "Unknown character {}, expected {} or {}",
-                ch, lower_half, upper_half
-            )
-        }
-    }
-
-    min
-}
-
-fn calculate_row(input: &str) -> u8 {
-    binary_space_partitioning(input, 127, 'F', 'B')
-}
-
-fn calculate_column(input: &str) -> u8 {
-    binary_space_partitioning(input, 7, 'L', 'R')
-}
-
 fn calculate_seat_id(input: &str) -> u16 {
-    let (row_input, column_input) = input.split_at(7);
-    let row = calculate_row(row_input);
-    let column = calculate_column(column_input);
+    let binary: String = input
+        .chars()
+        .map(|ch| match ch {
+            'F' | 'L' => '0',
+            'B' | 'R' => '1',
+            _ => panic!("Unknown character {}", ch),
+        })
+        .collect();
 
-    (row as u16) * 8 + (column as u16)
+    u16::from_str_radix(&binary, 2).unwrap()
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn calculates_row() {
-        assert_eq!(44, calculate_row("FBFBBFF"));
-        assert_eq!(70, calculate_row("BFFFBBF"));
-        assert_eq!(14, calculate_row("FFFBBBF"));
-        assert_eq!(102, calculate_row("BBFFBBF"));
-    }
-
-    #[test]
-    fn calculates_column() {
-        assert_eq!(5, calculate_column("RLR"));
-        assert_eq!(7, calculate_column("RRR"));
-        assert_eq!(4, calculate_column("RLL"));
-    }
 
     #[test]
     fn calculates_seat_id() {
